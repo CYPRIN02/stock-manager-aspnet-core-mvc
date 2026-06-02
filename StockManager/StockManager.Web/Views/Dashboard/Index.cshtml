@@ -1,0 +1,146 @@
+﻿@model StockManager.Web.Services.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">Dashboard</h1>
+            <p class="text-muted mb-0">Vue globale de votre gestion de stock</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="Products" asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Ajouter produit
+            </a>
+            <a asp-controller="StockMovements" asp-action="CreateEntry" class="btn btn-success">
+                <i class="bi bi-box-arrow-in-down"></i> Entrée stock
+            </a>
+            <a asp-controller="StockMovements" asp-action="CreateExit" class="btn btn-danger">
+                <i class="bi bi-box-arrow-up"></i> Sortie stock
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Produits</p>
+                    <h2 class="fw-bold">@Model.TotalProducts</h2>
+                    <span class="badge bg-primary-subtle text-primary">Total produits</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Valeur du stock</p>
+                    <h2 class="fw-bold">@Model.TotalStockValue.ToString("C")</h2>
+                    <span class="badge bg-success-subtle text-success">Valorisation globale</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Alertes stock</p>
+                    <h2 class="fw-bold text-danger">@Model.LowStockProductsCount</h2>
+                    <span class="badge bg-danger-subtle text-danger">Produits à surveiller</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Derniers mouvements</h5>
+                </div>
+
+                <div class="card-body px-4">
+                    @if (Model.LatestMovements.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th>Type</th>
+                                        <th>Quantité</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var movement in Model.LatestMovements)
+                                    {
+                                        <tr>
+                                            <td>@movement.Product?.Name</td>
+                                            <td>
+                                                @if (movement.Type == StockManager.Web.Models.StockMovementType.Entry)
+                                                {
+                                                    <span class="badge bg-success">Entrée</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Sortie</span>
+                                                }
+                                            </td>
+                                            <td>@movement.Quantity</td>
+                                            <td>@movement.MovementDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Aucun mouvement de stock pour le moment.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Produits en alerte</h5>
+                </div>
+
+                <div class="card-body px-4">
+                    @if (Model.LowStockProducts.Any())
+                    {
+                        @foreach (var product in Model.LowStockProducts)
+                        {
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                <div>
+                                    <div class="fw-semibold">@product.Name</div>
+                                    <small class="text-muted">@product.Category?.Name</small>
+                                </div>
+
+                                <span class="badge bg-danger rounded-pill">
+                                    @product.Quantity restant(s)
+                                </span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Aucun produit en alerte.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
