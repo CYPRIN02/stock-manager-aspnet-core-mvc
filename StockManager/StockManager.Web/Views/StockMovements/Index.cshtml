@@ -1,0 +1,75 @@
+﻿@model IEnumerable<StockManager.Web.Models.StockMovement>
+
+@{
+    ViewData["Title"] = "Mouvements de stock";
+    var movements = Model ?? Enumerable.Empty<StockManager.Web.Models.StockMovement>();
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">Mouvements de stock</h1>
+            <p class="text-muted">Historique des entrées et sorties de stock</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-action="CreateEntry" class="btn btn-success">
+                <i class="bi bi-box-arrow-in-down"></i> Entrée stock
+            </a>
+            <a asp-action="CreateExit" class="btn btn-danger">
+                <i class="bi bi-box-arrow-up"></i> Sortie stock
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+
+            @if (!movements.Any())
+            {
+                <div class="alert alert-info mb-0">
+                    Aucun mouvement de stock trouvé.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Produit</th>
+                                <th>Type</th>
+                                <th>Quantité</th>
+                                <th>Motif</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var movement in movements)
+                            {
+                                <tr>
+                                    <td>@movement.MovementDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@(movement.Product?.Name ?? "Produit supprimé")</td>
+                                    <td>
+                                        @if (movement.Type == StockManager.Web.Models.StockMovementType.Entry)
+                                        {
+                                            <span class="badge bg-success">Entrée</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Sortie</span>
+                                        }
+                                    </td>
+                                    <td>@movement.Quantity</td>
+                                    <td>@(movement.Reason ?? "-")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

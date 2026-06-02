@@ -18,7 +18,8 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    background-color: #f5f7fb;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -28,4 +29,32 @@ body {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
+}
+
+
+.card {
+    transition: all 0.2s ease-in-out;
+}
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+.table th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #6c757d;
+}
+
+.badge {
+    padding: 0.45rem 0.7rem;
+}
+
+.btn {
+    border-radius: 0.75rem;
+}
+
+.form-control,
+.form-select {
+    border-radius: 0.75rem;
 }

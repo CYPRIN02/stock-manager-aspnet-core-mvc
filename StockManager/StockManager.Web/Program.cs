@@ -57,4 +57,10 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<StockManagerDbContext>();
+    await DbSeeder.SeedAsync(context);
+}
+
 app.Run();

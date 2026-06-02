@@ -1,0 +1,51 @@
+﻿@model StockManager.Web.Models.StockMovement
+
+@{
+    ViewData["Title"] = "Sortie stock";
+}
+
+<div class="container py-4">
+    <h1 class="fw-bold">Sortie stock</h1>
+    <p class="text-muted">Retirer une quantité d’un produit existant</p>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+
+            <form asp-action="CreateExit" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="ProductId" class="form-label">Produit</label>
+                    <select asp-for="ProductId" asp-items="ViewBag.Products" class="form-select">
+                        <option value="">-- Sélectionner un produit --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Quantity" class="form-label">Quantité</label>
+                    <input asp-for="Quantity" type="number" min="1" class="form-control" />
+                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Reason" class="form-label">Motif</label>
+                    <textarea asp-for="Reason" class="form-control" rows="3" placeholder="Ex : Vente client, casse, perte..."></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-light">Annuler</a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-check-circle"></i> Valider sortie
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

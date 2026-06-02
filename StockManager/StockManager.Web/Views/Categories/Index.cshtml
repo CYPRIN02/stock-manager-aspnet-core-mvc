@@ -1,0 +1,77 @@
+﻿@model IEnumerable<StockManager.Web.Models.Category>
+
+@{
+    ViewData["Title"] = "Catégories";
+    var categories = Model ?? Enumerable.Empty<StockManager.Web.Models.Category>();
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">Catégories</h1>
+            <p class="text-muted">Organisation des produits</p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i>
+            Ajouter catégorie
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+
+            @if (!categories.Any())
+            {
+                <div class="alert alert-info mb-0">
+                    Aucune catégorie enregistrée.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nom</th>
+                                <th>Produits</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var category in categories)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">
+                                        @category.Name
+                                    </td>
+
+                                    <td>
+                                        @(category.Products?.Count ?? 0)
+                                    </td>
+
+                                    <td class="text-end">
+                                        <a asp-action="Edit"
+                                           asp-route-id="@category.Id"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Modifier
+                                        </a>
+
+                                        <a asp-action="Delete"
+                                           asp-route-id="@category.Id"
+                                           class="btn btn-sm btn-outline-danger">
+                                            Supprimer
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
