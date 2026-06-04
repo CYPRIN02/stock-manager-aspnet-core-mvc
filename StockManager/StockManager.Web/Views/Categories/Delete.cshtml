@@ -5,16 +5,21 @@
 }
 
 <div class="container py-4">
-    <h1 class="fw-bold text-danger">Supprimer la catégorie</h1>
+    <h1 class="fw-bold text-danger">Supprimer catégorie</h1>
 
-    <div class="card border-0 shadow-sm rounded-4 mt-3">
+    <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
             <p>Voulez-vous vraiment supprimer cette catégorie ?</p>
 
             <h4>@Model.Name</h4>
-            <p class="text-muted">Produits associés : @Model.Products.Count</p>
+            <p class="text-muted">Produits associés : @(Model.Products?.Count ?? 0)</p>
+
+            @if (Model.Products != null && Model.Products.Any())
+            {
+                <div class="alert alert-warning">
+                    Cette catégorie contient des produits. La suppression sera bloquée.
+                </div>
+            }
 
             <form asp-action="Delete" method="post">
                 @Html.AntiForgeryToken()

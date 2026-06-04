@@ -1,4 +1,34 @@
-﻿@page
-@model StockManager.Web.Views.Products.DeleteModel
+﻿@model StockManager.Web.Models.Product
+
 @{
+    ViewData["Title"] = "Supprimer produit";
 }
+
+<div class="container py-4">
+
+    <h1 class="fw-bold text-danger">Supprimer produit</h1>
+
+    <div class="card border-0 shadow-sm mt-3">
+        <div class="card-body p-4">
+
+            <p>Voulez-vous vraiment supprimer ce produit ?</p>
+
+            <h4>@Model.Name</h4>
+            <p class="text-muted">Référence : @Model.Reference</p>
+
+            <form asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-light">Annuler</a>
+                    <button type="submit" class="btn btn-danger">
+                        Confirmer suppression
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>

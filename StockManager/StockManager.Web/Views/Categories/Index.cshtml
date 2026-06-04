@@ -7,6 +7,169 @@
 
 <div class="container-fluid py-4">
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">Catégories</h1>
+            <p class="text-muted">Recherche, tri et consultation des familles de produits</p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Ajouter catégorie
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+
+                <div class="col-md-5">
+                    <label class="form-label">Recherche</label>
+                    <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Ex : Informatique" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Tri</label>
+                    <select name="sortOrder" class="form-select">
+                        <option value="name_asc" selected="@(ViewBag.SortOrder == "name_asc")">Nom A-Z</option>
+                        <option value="name_desc" selected="@(ViewBag.SortOrder == "name_desc")">Nom Z-A</option>
+                        <option value="products_asc" selected="@(ViewBag.SortOrder == "products_asc")">Produits croissant</option>
+                        <option value="products_desc" selected="@(ViewBag.SortOrder == "products_desc")">Produits décroissant</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Afficher</label>
+                    <select name="pageSize" class="form-select">
+                        <option value="25" selected="@(ViewBag.PageSize == 25)">25</option>
+                        <option value="50" selected="@(ViewBag.PageSize == 50)">50</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        Filtrer
+                    </button>
+                    <a asp-action="Index" class="btn btn-light w-100">
+                        Reset
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+
+            @if (!categories.Any())
+            {
+                <div class="alert alert-info mb-0">Aucune catégorie trouvée.</div>
+            }
+            else
+            {
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nom</th>
+                            <th>Nombre de produits</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var category in categories)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@category.Id" class="fw-semibold text-decoration-none">
+                                        @category.Name
+                                    </a>
+                                </td>
+
+                                <td>@(category.Products?.Count ?? 0)</td>
+
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-route-id="@category.Id" class="btn btn-sm btn-outline-secondary">Voir</a>
+                                    <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-outline-primary">Modifier</a>
+                                    <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-sm btn-outline-danger">Supprimer</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+
+        </div>
+    </div>
+</div>
+
+@* @model IEnumerable<StockManager.Web.Models.Category>
+
+@{
+    ViewData["Title"] = "Catégories";
+    var categories = Model ?? Enumerable.Empty<StockManager.Web.Models.Category>();
+}
+<section class="hero-dashboard mb-4">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold display-6 mb-3">
+                Gestion intelligente de stock avec AmadagoIT
+            </h1>
+
+            <p class="lead text-muted mb-4">
+                Cette application permet de gérer les produits, les fournisseurs,
+                les catégories, les entrées et les sorties de stock avec suivi des alertes.
+            </p>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <a asp-controller="Products" asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Ajouter produit
+                </a>
+
+                <a asp-controller="StockMovements" asp-action="CreateEntry" class="btn btn-success">
+                    <i class="bi bi-box-arrow-in-down"></i> Entrée stock
+                </a>
+
+                <a asp-controller="StockMovements" asp-action="CreateExit" class="btn btn-danger">
+                    <i class="bi bi-box-arrow-up"></i> Sortie stock
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-4 text-center mt-4 mt-lg-0">
+            <div class="stock-animation">
+                <div class="box box-1">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="box box-2">
+                    <i class="bi bi-arrow-right"></i>
+                </div>
+                <div class="box box-3">
+                    <i class="bi bi-truck"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container-fluid py-4">
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="fw-bold">Catégories</h1>
@@ -74,4 +237,4 @@
 
         </div>
     </div>
-</div>
+</div> *@

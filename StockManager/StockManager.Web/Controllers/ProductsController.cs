@@ -15,23 +15,88 @@ public class ProductsController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index(string? search)
+    public async Task<IActionResult> Index(
+        string? search,
+        int? categoryId,
+        int? supplierId,
+        string? status,
+        string sortOrder = "name_asc",
+        int pageSize = 25)
     {
-        var products = _context.Products
+        var productsQuery = _context.Products
             .Include(p => p.Category)
             .Include(p => p.Supplier)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            products = products.Where(p =>
+            productsQuery = productsQuery.Where(p =>
                 p.Name.Contains(search) ||
                 p.Reference.Contains(search));
         }
 
-        ViewBag.Search = search;
+        if (categoryId.HasValue)
+        {
+            productsQuery = productsQuery.Where(p => p.CategoryId == categoryId.Value);
+        }
 
-        return View(await products.OrderBy(p => p.Name).ToListAsync());
+        if (supplierId.HasValue)
+        {
+            productsQuery = productsQuery.Where(p => p.SupplierId == supplierId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (status == "low")
+            {
+                productsQuery = productsQuery.Where(p => p.Quantity <= p.AlertThreshold);
+            }
+            else if (status == "ok")
+            {
+                productsQuery = productsQuery.Where(p => p.Quantity > p.AlertThreshold);
+            }
+        }
+
+        productsQuery = sortOrder switch
+        {
+            "name_desc" => productsQuery.OrderByDescending(p => p.Name),
+            "quantity_asc" => productsQuery.OrderBy(p => p.Quantity),
+            "quantity_desc" => productsQuery.OrderByDescending(p => p.Quantity),
+            "reference_asc" => productsQuery.OrderBy(p => p.Reference),
+            "reference_desc" => productsQuery.OrderByDescending(p => p.Reference),
+            _ => productsQuery.OrderBy(p => p.Name)
+        };
+
+        pageSize = pageSize == 50 ? 50 : 25;
+
+        ViewBag.Search = search;
+        ViewBag.CategoryId = categoryId;
+        ViewBag.SupplierId = supplierId;
+        ViewBag.Status = status;
+        ViewBag.SortOrder = sortOrder;
+        ViewBag.PageSize = pageSize;
+
+        await LoadDropdownsAsync();
+
+        var products = await productsQuery
+            .Take(pageSize)
+            .ToListAsync();
+
+        return View(products);
+    }
+
+    public async Task<IActionResult> Details(int id)
+    {
+        var product = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Supplier)
+            .Include(p => p.StockMovements.OrderByDescending(m => m.MovementDate))
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product == null)
+            return NotFound();
+
+        return View(product);
     }
 
     public async Task<IActionResult> Create()
@@ -44,6 +109,15 @@ public class ProductsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Product product)
     {
+        var referenceExists = await _context.Products
+            .AnyAsync(p => p.Reference == product.Reference);
+
+        if (referenceExists)
+        {
+            ModelState.AddModelError("Reference", "Cette référence existe déjà. Veuillez choisir une autre référence.");
+            TempData["ErrorMessage"] = "Impossible d'ajouter ce produit : référence déjà utilisée.";
+        }
+
         if (!ModelState.IsValid)
         {
             await LoadDropdownsAsync();
@@ -53,6 +127,84 @@ public class ProductsController : Controller
         _context.Products.Add(product);
         await _context.SaveChangesAsync();
 
+        TempData["SuccessMessage"] = "Produit ajouté avec succès.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    public async Task<IActionResult> Edit(int id)
+    {
+        var product = await _context.Products.FindAsync(id);
+
+        if (product == null)
+            return NotFound();
+
+        await LoadDropdownsAsync();
+        return View(product);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Product product)
+    {
+        if (id != product.Id)
+            return BadRequest();
+
+        var referenceExists = await _context.Products
+            .AnyAsync(p => p.Reference == product.Reference && p.Id != product.Id);
+
+        if (referenceExists)
+        {
+            ModelState.AddModelError("Reference", "Cette référence est déjà utilisée par un autre produit.");
+            TempData["ErrorMessage"] = "Modification impossible : référence déjà utilisée.";
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await LoadDropdownsAsync();
+            return View(product);
+        }
+
+        _context.Products.Update(product);
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Produit modifié avec succès.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    public async Task<IActionResult> Delete(int id)
+    {
+        var product = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Supplier)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product == null)
+            return NotFound();
+
+        return View(product);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var product = await _context.Products
+            .Include(p => p.StockMovements)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product == null)
+            return NotFound();
+
+        if (product.StockMovements.Any())
+        {
+            TempData["ErrorMessage"] = "Impossible de supprimer ce produit car il possède des mouvements de stock.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        _context.Products.Remove(product);
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Produit supprimé avec succès.";
         return RedirectToAction(nameof(Index));
     }
 

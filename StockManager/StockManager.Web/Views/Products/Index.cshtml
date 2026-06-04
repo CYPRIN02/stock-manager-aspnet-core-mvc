@@ -2,84 +2,174 @@
 
 @{
     ViewData["Title"] = "Produits";
+    var products = Model ?? Enumerable.Empty<StockManager.Web.Models.Product>();
 }
 
 <div class="container-fluid py-4">
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="fw-bold">Produits</h1>
-            <p class="text-muted">Liste complète des produits en stock</p>
+            <p class="text-muted">Recherche, tri et suivi des produits en stock</p>
         </div>
 
-        <a asp-controller="Products" asp-action="Create" class="btn btn-primary">
+        <a asp-action="Create" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i> Ajouter produit
         </a>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
+    <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
+            <form method="get" class="row g-3">
 
-            <form method="get" class="row g-2 mb-4">
-                <div class="col-md-10">
-                    <input type="text"
-                           name="search"
-                           value="@ViewBag.Search"
-                           class="form-control"
-                           placeholder="Rechercher par nom ou référence..." />
+                <div class="col-md-3">
+                    <label class="form-label">Référence ou nom</label>
+                    <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Ex : PROD-001" />
                 </div>
 
-                <div class="col-md-2 d-grid">
-                    <button class="btn btn-outline-primary" type="submit">
-                        <i class="bi bi-search"></i> Rechercher
+                <div class="col-md-2">
+                    <label class="form-label">Catégorie</label>
+                    <select name="categoryId" asp-items="ViewBag.Categories" class="form-select">
+                        <option value="">Toutes</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Fournisseur</label>
+                    <select name="supplierId" asp-items="ViewBag.Suppliers" class="form-select">
+                        <option value="">Tous</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Statut</label>
+                    <select name="status" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="ok" selected="@(ViewBag.Status == "ok")">Stock OK</option>
+                        <option value="low" selected="@(ViewBag.Status == "low")">Alerte stock</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Tri</label>
+                    <select name="sortOrder" class="form-select">
+                        <option value="name_asc" selected="@(ViewBag.SortOrder == "name_asc")">Nom A-Z</option>
+                        <option value="name_desc" selected="@(ViewBag.SortOrder == "name_desc")">Nom Z-A</option>
+                        <option value="reference_asc" selected="@(ViewBag.SortOrder == "reference_asc")">Référence A-Z</option>
+                        <option value="reference_desc" selected="@(ViewBag.SortOrder == "reference_desc")">Référence Z-A</option>
+                        <option value="quantity_asc" selected="@(ViewBag.SortOrder == "quantity_asc")">Quantité croissante</option>
+                        <option value="quantity_desc" selected="@(ViewBag.SortOrder == "quantity_desc")">Quantité décroissante</option>
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <label class="form-label">Afficher</label>
+                    <select name="pageSize" class="form-select">
+                        <option value="25" selected="@(ViewBag.PageSize == 25)">25</option>
+                        <option value="50" selected="@(ViewBag.PageSize == 50)">50</option>
+                    </select>
+                </div>
+
+                <div class="col-12 d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-light">Réinitialiser</a>
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-funnel"></i> Filtrer
                     </button>
                 </div>
+
             </form>
+        </div>
+    </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Référence</th>
-                            <th>Produit</th>
-                            <th>Catégorie</th>
-                            <th>Fournisseur</th>
-                            <th>Quantité</th>
-                            <th>Prix unitaire</th>
-                            <th>Valeur stock</th>
-                            <th>Statut</th>
-                        </tr>
-                    </thead>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
 
-                    <tbody>
-                        @foreach (var product in Model)
-                        {
-                            var stockValue = product.Quantity * product.UnitPrice;
-                            var isLowStock = product.Quantity <= product.AlertThreshold;
-
+            @if (!products.Any())
+            {
+                <div class="alert alert-info mb-0">
+                    Aucun produit trouvé.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
                             <tr>
-                                <td class="fw-semibold">@product.Reference</td>
-                                <td>@product.Name</td>
-                                <td>@product.Category?.Name</td>
-                                <td>@product.Supplier?.Name</td>
-                                <td>@product.Quantity</td>
-                                <td>@product.UnitPrice.ToString("C")</td>
-                                <td>@stockValue.ToString("C")</td>
-                                <td>
-                                    @if (isLowStock)
-                                    {
-                                        <span class="badge bg-danger">Alerte</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-success">OK</span>
-                                    }
-                                </td>
+                                <th>Référence</th>
+                                <th>Produit</th>
+                                <th>Catégorie</th>
+                                <th>Fournisseur</th>
+                                <th>Quantité</th>
+                                <th>Prix</th>
+                                <th>Statut</th>
+                                <th class="text-end">Actions</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var product in products)
+                            {
+                                var isLowStock = product.Quantity <= product.AlertThreshold;
+
+                                <tr>
+                                    <td class="fw-semibold">@product.Reference</td>
+
+                                    <td>
+                                        <a asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none fw-semibold">
+                                            @product.Name
+                                        </a>
+                                    </td>
+
+                                    <td>@(product.Category?.Name ?? "-")</td>
+                                    <td>@(product.Supplier?.Name ?? "-")</td>
+                                    <td>@product.Quantity</td>
+                                    <td>@product.UnitPrice.ToString("C")</td>
+
+                                    <td>
+                                        @if (isLowStock)
+                                        {
+                                            <span class="badge bg-danger">Alerte</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">OK</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-end">
+                                        <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-secondary">
+                                            Voir
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary">
+                                            Modifier
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-outline-danger">
+                                            Supprimer
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
 
         </div>
     </div>
