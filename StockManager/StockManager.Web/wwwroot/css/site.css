@@ -142,3 +142,240 @@ body {
         transform: translateX(0);
     }
 }
+
+.pagination-dark .page-link {
+    color: #111;
+    border-color: #ddd;
+}
+
+    .pagination-dark .page-link:hover {
+        color: #000;
+        background-color: #f1f1f1;
+        border-color: #ccc;
+    }
+
+.pagination-dark .page-item.active .page-link {
+    background-color: #111;
+    border-color: #111;
+    color: #fff;
+}
+
+.pagination-dark .page-item.disabled .page-link {
+    color: #999;
+}
+
+#backToTopBtn {
+    position: fixed;
+    right: 25px;
+    bottom: 25px;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: #111;
+    color: white;
+    font-size: 22px;
+    display: none;
+    z-index: 999;
+}
+
+    #backToTopBtn:hover {
+        background: #333;
+    }
+
+.hero-home {
+    min-height: 78vh;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: center;
+    gap: 50px;
+    padding: 70px 6%;
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+    border-radius: 28px;
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 18px;
+}
+
+.hero-content h1 {
+    font-size: 64px;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    max-width: 650px;
+    color: #555;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+.hero-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.hero-animation {
+    position: relative;
+    min-height: 430px;
+}
+
+.stock-card {
+    position: absolute;
+    right: 20px;
+    top: 70px;
+    width: 340px;
+    background: #fff;
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.12);
+    z-index: 2;
+}
+
+    .stock-card h5 {
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    .stock-card p {
+        color: #777;
+        font-size: 14px;
+        margin-bottom: 22px;
+    }
+
+.stock-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
+}
+
+    .stock-line strong {
+        color: #111;
+    }
+
+.alert-line strong {
+    color: #dc3545;
+}
+
+.box {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    background: #111;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18);
+    animation: floatBox 4s ease-in-out infinite;
+}
+
+.box-1 {
+    top: 20px;
+    left: 40px;
+}
+
+.box-2 {
+    top: 270px;
+    left: 10px;
+    animation-delay: .5s;
+}
+
+.box-3 {
+    top: 40px;
+    right: 20px;
+    animation-delay: 1s;
+}
+
+.box-4 {
+    bottom: 20px;
+    right: 70px;
+    animation-delay: 1.5s;
+}
+
+@keyframes floatBox {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-18px);
+    }
+}
+
+.features-home {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+    margin-top: 35px;
+}
+
+.feature-card {
+    background: #fff;
+    padding: 28px;
+    border-radius: 22px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+    transition: 0.3s;
+}
+
+    .feature-card:hover {
+        transform: translateY(-6px);
+    }
+
+    .feature-card i {
+        font-size: 32px;
+        color: #111;
+        margin-bottom: 16px;
+    }
+
+    .feature-card h4 {
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+
+    .feature-card p {
+        color: #666;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+@media (max-width: 992px) {
+    .hero-home {
+        grid-template-columns: 1fr;
+        padding: 45px 25px;
+    }
+
+    .hero-content h1 {
+        font-size: 44px;
+    }
+
+    .features-home {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stock-card {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .features-home {
+        grid-template-columns: 1fr;
+    }
+}

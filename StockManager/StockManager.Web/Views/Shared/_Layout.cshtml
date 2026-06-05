@@ -15,7 +15,7 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2"
-                   asp-controller="Dashboard"
+                   asp-controller="Home"
                    asp-action="Index">
                     <i class="bi bi-box-seam-fill fs-4"></i>
                     AmadagoIT
@@ -74,5 +74,8 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <button onclick="scrollToTop()" id="backToTopBtn" title="Remonter">
+        ↑
+    </button>
 </body>
 </html>

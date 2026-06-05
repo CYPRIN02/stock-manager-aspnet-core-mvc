@@ -45,15 +45,27 @@
 
                 <div class="col-md-2">
                     <label class="form-label">Catégorie</label>
-                    <select name="categoryId" asp-items="ViewBag.Categories" class="form-select">
+                    <select name="categoryId" class="form-select">
                         <option value="">Toutes</option>
+                        @foreach (var category in ViewBag.Categories)
+                        {
+                            <option value="@category.Value" selected="@(category.Value == Convert.ToString(ViewBag.CategoryId))">
+                                @category.Text
+                            </option>
+                        }
                     </select>
                 </div>
 
                 <div class="col-md-2">
                     <label class="form-label">Fournisseur</label>
-                    <select name="supplierId" asp-items="ViewBag.Suppliers" class="form-select">
+                    <select name="supplierId" class="form-select">
                         <option value="">Tous</option>
+                        @foreach (var supplier in ViewBag.Suppliers)
+                        {
+                            <option value="@supplier.Value" selected="@(supplier.Value == Convert.ToString(ViewBag.SupplierId))">
+                                @supplier.Text
+                            </option>
+                        }
                     </select>
                 </div>
 
@@ -108,6 +120,59 @@
             }
             else
             {
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center pagination-dark">
+
+                            <li class="page-item @(ViewBag.CurrentPage <= 1 ? "disabled" : "")">
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-page="@(ViewBag.CurrentPage - 1)"
+                                   asp-route-pageSize="@ViewBag.PageSize"
+                                   asp-route-search="@ViewBag.Search"
+                                   asp-route-categoryId="@ViewBag.CategoryId"
+                                   asp-route-supplierId="@ViewBag.SupplierId"
+                                   asp-route-status="@ViewBag.Status"
+                                   asp-route-sortOrder="@ViewBag.SortOrder">
+                                    Précédent
+                                </a>
+                            </li>
+
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                    <a class="page-link"
+                                       asp-action="Index"
+                                       asp-route-page="@i"
+                                       asp-route-pageSize="@ViewBag.PageSize"
+                                       asp-route-search="@ViewBag.Search"
+                                       asp-route-categoryId="@ViewBag.CategoryId"
+                                       asp-route-supplierId="@ViewBag.SupplierId"
+                                       asp-route-status="@ViewBag.Status"
+                                       asp-route-sortOrder="@ViewBag.SortOrder">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="page-item @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")">
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-page="@(ViewBag.CurrentPage + 1)"
+                                   asp-route-pageSize="@ViewBag.PageSize"
+                                   asp-route-search="@ViewBag.Search"
+                                   asp-route-categoryId="@ViewBag.CategoryId"
+                                   asp-route-supplierId="@ViewBag.SupplierId"
+                                   asp-route-status="@ViewBag.Status"
+                                   asp-route-sortOrder="@ViewBag.SortOrder">
+                                    Suivant
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
+                }
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
@@ -169,6 +234,59 @@
                         </tbody>
                     </table>
                 </div>
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center pagination-dark">
+
+                            <li class="page-item @(ViewBag.CurrentPage <= 1 ? "disabled" : "")">
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-page="@(ViewBag.CurrentPage - 1)"
+                                   asp-route-pageSize="@ViewBag.PageSize"
+                                   asp-route-search="@ViewBag.Search"
+                                   asp-route-categoryId="@ViewBag.CategoryId"
+                                   asp-route-supplierId="@ViewBag.SupplierId"
+                                   asp-route-status="@ViewBag.Status"
+                                   asp-route-sortOrder="@ViewBag.SortOrder">
+                                    Précédent
+                                </a>
+                            </li>
+
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                    <a class="page-link"
+                                       asp-action="Index"
+                                       asp-route-page="@i"
+                                       asp-route-pageSize="@ViewBag.PageSize"
+                                       asp-route-search="@ViewBag.Search"
+                                       asp-route-categoryId="@ViewBag.CategoryId"
+                                       asp-route-supplierId="@ViewBag.SupplierId"
+                                       asp-route-status="@ViewBag.Status"
+                                       asp-route-sortOrder="@ViewBag.SortOrder">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="page-item @(ViewBag.CurrentPage >= ViewBag.TotalPages ? "disabled" : "")">
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-page="@(ViewBag.CurrentPage + 1)"
+                                   asp-route-pageSize="@ViewBag.PageSize"
+                                   asp-route-search="@ViewBag.Search"
+                                   asp-route-categoryId="@ViewBag.CategoryId"
+                                   asp-route-supplierId="@ViewBag.SupplierId"
+                                   asp-route-status="@ViewBag.Status"
+                                   asp-route-sortOrder="@ViewBag.SortOrder">
+                                    Suivant
+                                </a>
+                            </li>
+
+                        </ul>
+                    </nav>
+                }
             }
 
         </div>

@@ -1,8 +1,77 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Accueil";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero-home">
+    <div class="hero-content">
+        <span class="hero-badge">Application ASP.NET Core MVC</span>
+
+        <h1>Stock Manager</h1>
+
+        <p>
+            Une application web professionnelle pour gérer les produits électroniques,
+            suivre les stocks, organiser les catégories, gérer les fournisseurs
+            et visualiser les mouvements d’entrée et de sortie.
+        </p>
+
+        <div class="hero-actions">
+            <a asp-controller="Products" asp-action="Index" class="btn btn-dark">
+                Voir les produits
+            </a>
+            <a asp-controller="Categories" asp-action="Index" class="btn btn-outline-dark">
+                Gérer les catégories
+            </a>
+        </div>
+    </div>
+
+    <div class="hero-animation">
+        <div class="box box-1">📦</div>
+        <div class="box box-2">💻</div>
+        <div class="box box-3">📱</div>
+        <div class="box box-4">🎧</div>
+
+        <div class="stock-card">
+            <h5>Gestion de stock</h5>
+            <p>Produits · Fournisseurs · Catégories</p>
+
+            <div class="stock-line">
+                <span>Ordinateurs</span>
+                <strong>128</strong>
+            </div>
+            <div class="stock-line">
+                <span>Smartphones</span>
+                <strong>76</strong>
+            </div>
+            <div class="stock-line alert-line">
+                <span>Casques audio</span>
+                <strong>Alerte</strong>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features-home">
+    <div class="feature-card">
+        <i class="bi bi-box-seam"></i>
+        <h4>Produits</h4>
+        <p>Ajout, modification, suppression, détails, tri, recherche et pagination.</p>
+    </div>
+
+    <div class="feature-card">
+        <i class="bi bi-tags"></i>
+        <h4>Catégories</h4>
+        <p>Organisation claire des produits par famille : PC, mobile, accessoires.</p>
+    </div>
+
+    <div class="feature-card">
+        <i class="bi bi-truck"></i>
+        <h4>Fournisseurs</h4>
+        <p>Suivi des partenaires, contacts et informations liées aux produits.</p>
+    </div>
+
+    <div class="feature-card">
+        <i class="bi bi-arrow-left-right"></i>
+        <h4>Mouvements</h4>
+        <p>Historique des entrées, sorties et alertes de stock faible.</p>
+    </div>
+</section>

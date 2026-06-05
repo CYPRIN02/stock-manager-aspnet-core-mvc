@@ -20,67 +20,68 @@ public class ProductsController : Controller
         int? categoryId,
         int? supplierId,
         string? status,
-        string sortOrder = "name_asc",
-        int pageSize = 25)
+        string? sortOrder,
+        int pageSize = 25,
+        int page = 1)
     {
-        var productsQuery = _context.Products
+        if (pageSize != 25 && pageSize != 50)
+            pageSize = 25;
+
+        if (page < 1)
+            page = 1;
+
+        var query = _context.Products
             .Include(p => p.Category)
             .Include(p => p.Supplier)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            productsQuery = productsQuery.Where(p =>
+            query = query.Where(p =>
                 p.Name.Contains(search) ||
                 p.Reference.Contains(search));
         }
 
         if (categoryId.HasValue)
-        {
-            productsQuery = productsQuery.Where(p => p.CategoryId == categoryId.Value);
-        }
+            query = query.Where(p => p.CategoryId == categoryId.Value);
 
         if (supplierId.HasValue)
-        {
-            productsQuery = productsQuery.Where(p => p.SupplierId == supplierId.Value);
-        }
+            query = query.Where(p => p.SupplierId == supplierId.Value);
 
-        if (!string.IsNullOrWhiteSpace(status))
-        {
-            if (status == "low")
-            {
-                productsQuery = productsQuery.Where(p => p.Quantity <= p.AlertThreshold);
-            }
-            else if (status == "ok")
-            {
-                productsQuery = productsQuery.Where(p => p.Quantity > p.AlertThreshold);
-            }
-        }
+        if (status == "low")
+            query = query.Where(p => p.Quantity <= p.AlertThreshold);
+        else if (status == "ok")
+            query = query.Where(p => p.Quantity > p.AlertThreshold);
 
-        productsQuery = sortOrder switch
+        query = sortOrder switch
         {
-            "name_desc" => productsQuery.OrderByDescending(p => p.Name),
-            "quantity_asc" => productsQuery.OrderBy(p => p.Quantity),
-            "quantity_desc" => productsQuery.OrderByDescending(p => p.Quantity),
-            "reference_asc" => productsQuery.OrderBy(p => p.Reference),
-            "reference_desc" => productsQuery.OrderByDescending(p => p.Reference),
-            _ => productsQuery.OrderBy(p => p.Name)
+            "name_desc" => query.OrderByDescending(p => p.Name),
+            "reference_asc" => query.OrderBy(p => p.Reference),
+            "reference_desc" => query.OrderByDescending(p => p.Reference),
+            "quantity_asc" => query.OrderBy(p => p.Quantity),
+            "quantity_desc" => query.OrderByDescending(p => p.Quantity),
+            _ => query.OrderBy(p => p.Name)
         };
 
-        pageSize = pageSize == 50 ? 50 : 25;
+        var totalItems = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
+        var products = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+         
         ViewBag.Search = search;
         ViewBag.CategoryId = categoryId;
         ViewBag.SupplierId = supplierId;
         ViewBag.Status = status;
         ViewBag.SortOrder = sortOrder;
         ViewBag.PageSize = pageSize;
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = totalPages;
 
-        await LoadDropdownsAsync();
-
-        var products = await productsQuery
-            .Take(pageSize)
-            .ToListAsync();
+        ViewBag.Categories = new SelectList(await _context.Categories.ToListAsync(), "Id", "Name");
+        ViewBag.Suppliers = new SelectList(await _context.Suppliers.ToListAsync(), "Id", "Name");
 
         return View(products);
     }
