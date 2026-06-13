@@ -3,14 +3,15 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StockManager.Web.Data;
 using StockManager.Web.Models;
-
+using Microsoft.AspNetCore.Authorization;
 namespace StockManager.Web.Controllers;
 
+[Authorize(Roles = "Admin,Manager,Employee")]
 public class ProductsController : Controller
 {
-    private readonly StockManagerDbContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public ProductsController(StockManagerDbContext context)
+    public ProductsController(ApplicationDbContext context)
     {
         _context = context;
     }
@@ -49,9 +50,9 @@ public class ProductsController : Controller
             query = query.Where(p => p.SupplierId == supplierId.Value);
 
         if (status == "low")
-            query = query.Where(p => p.Quantity <= p.AlertThreshold);
+            query = query.Where(p => p.Quantity <= p.AlertQuantity);
         else if (status == "ok")
-            query = query.Where(p => p.Quantity > p.AlertThreshold);
+            query = query.Where(p => p.Quantity > p.AlertQuantity);
 
         query = sortOrder switch
         {
@@ -108,6 +109,7 @@ public class ProductsController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Create(Product product)
     {
         var referenceExists = await _context.Products
@@ -171,7 +173,7 @@ public class ProductsController : Controller
         TempData["SuccessMessage"] = "Produit modifié avec succès.";
         return RedirectToAction(nameof(Index));
     }
-
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var product = await _context.Products

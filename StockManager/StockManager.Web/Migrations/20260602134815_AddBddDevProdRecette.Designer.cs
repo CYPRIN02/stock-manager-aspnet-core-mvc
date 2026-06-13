@@ -11,9 +11,9 @@ using StockManager.Web.Data;
 
 namespace StockManager.Web.Migrations.StockManagerDb
 {
-    [DbContext(typeof(StockManagerDbContext))]
-    [Migration("20260604113640_AddUniqueProductReference")]
-    partial class AddUniqueProductReference
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20260602134815_AddBddDevProdRecette")]
+    partial class AddBddDevProdRecette
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,7 +51,7 @@ namespace StockManager.Web.Migrations.StockManagerDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AlertThreshold")
+                    b.Property<int>("AlertQuantity")
                         .HasColumnType("int");
 
                     b.Property<int>("CategoryId")

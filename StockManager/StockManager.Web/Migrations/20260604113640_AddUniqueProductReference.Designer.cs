@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StockManager.Web.Data;
 
@@ -10,10 +11,12 @@ using StockManager.Web.Data;
 
 namespace StockManager.Web.Migrations.StockManagerDb
 {
-    [DbContext(typeof(StockManagerDbContext))]
-    partial class StockManagerDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20260604113640_AddUniqueProductReference")]
+    partial class AddUniqueProductReference
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,7 +51,7 @@ namespace StockManager.Web.Migrations.StockManagerDb
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AlertThreshold")
+                    b.Property<int>("AlertQuantity")
                         .HasColumnType("int");
 
                     b.Property<int>("CategoryId")

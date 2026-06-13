@@ -7,9 +7,9 @@ namespace StockManager.Web.Repositories;
 
 public class StockMovementRepository : IStockMovementRepository
 {
-    private readonly StockManagerDbContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public StockMovementRepository(StockManagerDbContext context)
+    public StockMovementRepository(ApplicationDbContext context)
     {
         _context = context;
     }

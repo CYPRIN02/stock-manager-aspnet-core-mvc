@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using StockManager.Web.Data;
-using StockManager.Web.Entities;
+using StockManager.Web.Models;
 using StockManager.Web.Services.Interfaces;
 
 namespace StockManager.Web.Services;

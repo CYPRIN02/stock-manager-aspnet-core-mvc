@@ -32,9 +32,9 @@
                     <p><strong>Fournisseur :</strong> @(Model.Supplier?.Name ?? "-")</p>
                     <p><strong>Prix unitaire :</strong> @Model.UnitPrice.ToString("C")</p>
                     <p><strong>Quantité :</strong> @Model.Quantity</p>
-                    <p><strong>Seuil d’alerte :</strong> @Model.AlertThreshold</p>
+                    <p><strong>Seuil d’alerte :</strong> @Model.AlertQuantity</p>
 
-                    @if (Model.Quantity <= Model.AlertThreshold)
+                    @if (Model.Quantity <= Model.AlertQuantity)
                     {
                         <span class="badge bg-danger">Produit en alerte stock</span>
                     }

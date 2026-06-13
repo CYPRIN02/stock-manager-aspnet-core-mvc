@@ -3,5 +3,6 @@
 public enum StockMovementType
 {
     Entry = 1,
-    Exit = 2
+    Exit = 2,
+    Adjustment = 3
 }

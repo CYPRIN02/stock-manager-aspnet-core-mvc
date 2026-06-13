@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockManager.Web.Data;
 using StockManager.Web.Models;
 
 namespace StockManager.Web.Controllers;
 
+[Authorize(Roles = "Admin,Manager")]
 public class CategoriesController : Controller
 {
-    private readonly StockManagerDbContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public CategoriesController(StockManagerDbContext context)
+    public CategoriesController(ApplicationDbContext context)
     {
         _context = context;
     }
@@ -120,7 +122,7 @@ public class CategoriesController : Controller
         TempData["SuccessMessage"] = "Catégorie modifiée avec succès.";
         return RedirectToAction(nameof(Index));
     }
-
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var category = await _context.Categories

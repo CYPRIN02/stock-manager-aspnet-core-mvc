@@ -7,9 +7,9 @@ namespace StockManager.Web.Repositories;
 
 public class ProductRepository : IProductRepository
 {
-    private readonly StockManagerDbContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public ProductRepository(StockManagerDbContext context)
+    public ProductRepository(ApplicationDbContext context)
     {
         _context = context;
     }
@@ -28,14 +28,14 @@ public class ProductRepository : IProductRepository
     public Task<int> CountLowStockAsync()
     {
         return _context.Products
-            .CountAsync(p => p.Quantity <= p.AlertThreshold);
+            .CountAsync(p => p.Quantity <= p.AlertQuantity);
     }
 
     public Task<List<Product>> GetLowStockProductsAsync()
     {
         return _context.Products
             .Include(p => p.Category)
-            .Where(p => p.Quantity <= p.AlertThreshold)
+            .Where(p => p.Quantity <= p.AlertQuantity)
             .OrderBy(p => p.Quantity)
             .Take(5)
             .ToListAsync();

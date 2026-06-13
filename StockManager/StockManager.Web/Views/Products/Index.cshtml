@@ -191,7 +191,7 @@
                         <tbody>
                             @foreach (var product in products)
                             {
-                                var isLowStock = product.Quantity <= product.AlertThreshold;
+                                var isLowStock = product.Quantity <= product.AlertQuantity;
 
                                 <tr>
                                     <td class="fw-semibold">@product.Reference</td>

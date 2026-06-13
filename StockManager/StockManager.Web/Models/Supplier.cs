@@ -15,6 +15,8 @@ public class Supplier
 
     [StringLength(30)]
     public string? Phone { get; set; }
+    [MaxLength(255)]
+    public string? Address { get; set; }
 
     public ICollection<Product> Products { get; set; } = new List<Product>();
 }

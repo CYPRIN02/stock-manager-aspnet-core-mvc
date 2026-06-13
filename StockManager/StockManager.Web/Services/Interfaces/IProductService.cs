@@ -1,4 +1,4 @@
-﻿using StockManager.Web.Entities;
+﻿using StockManager.Web.Models;
 
 namespace StockManager.Web.Services.Interfaces;
 

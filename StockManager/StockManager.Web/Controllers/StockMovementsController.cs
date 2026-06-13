@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StockManager.Web.Data;
@@ -6,11 +7,13 @@ using StockManager.Web.Models;
 
 namespace StockManager.Web.Controllers;
 
+[Authorize(Roles = "Admin,Manager,Employee")]
+
 public class StockMovementsController : Controller
 {
-    private readonly StockManagerDbContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public StockMovementsController(StockManagerDbContext context)
+    public StockMovementsController(ApplicationDbContext context)
     {
         _context = context;
     }

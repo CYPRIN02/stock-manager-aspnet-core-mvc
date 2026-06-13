@@ -1,4 +1,4 @@
-﻿using StockManager.Web.Entities;
+﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,16 +13,16 @@ public class Product
     public string Name { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(50)]
-    public string Reference { get; set; } = string.Empty;
+    [StringLength(100)]
+    public string? Reference { get; set; } = string.Empty;
 
     [Range(0, int.MaxValue)]
     public int Quantity { get; set; }
-
+    public int AlertQuantity { get; set; } = 10;
     [Column(TypeName = "decimal(18,2)")]
     public decimal UnitPrice { get; set; }
 
-    public int AlertThreshold { get; set; } = 10;
+    //public int AlertThreshold { get; set; } = 10;
 
     public int CategoryId { get; set; }
     public Category? Category { get; set; }

@@ -51,7 +51,7 @@
                     <tbody>
                         @foreach (var product in Model.Products.OrderBy(p => p.Name))
                         {
-                            var isLowStock = product.Quantity <= product.AlertThreshold;
+                            var isLowStock = product.Quantity <= product.AlertQuantity;
 
                             <tr>
                                 <td>@product.Reference</td>

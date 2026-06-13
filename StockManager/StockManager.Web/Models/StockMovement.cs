@@ -1,4 +1,4 @@
-﻿using StockManager.Web.Entities;
+﻿using StockManager.Web.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace StockManager.Web.Models;

@@ -1,15 +1,69 @@
-﻿using StockManager.Web.Models;
-
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using StockManager.Web.Models;
 namespace StockManager.Web.Data;
 
 public static class DbSeeder
 {
-    public static async Task SeedAsync(StockManagerDbContext context)
+    public static async Task SeedAsync(IServiceProvider services)
     {
-        if (context.Categories.Any() ||
-            context.Suppliers.Any() ||
-            context.Products.Any() ||
-            context.StockMovements.Any())
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+
+        await SeedRolesAsync(roleManager);
+        await SeedAdminAsync(userManager);
+        await SeedDataAsync(context);
+    }
+
+    private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
+    {
+        string[] roles = { "Admin", "Manager", "Employee" };
+
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+    }
+
+    private static async Task SeedAdminAsync(UserManager<IdentityUser> userManager)
+    {
+        const string adminEmail = "admin@amadagoit.com";
+        const string adminPassword = "Admin123!";
+
+        var admin = await userManager.FindByEmailAsync(adminEmail);
+
+        if (admin == null)
+        {
+            admin = new IdentityUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(admin, adminPassword);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(admin, "Admin");
+            }
+        }
+        else if (!await userManager.IsInRoleAsync(admin, "Admin"))
+        {
+            await userManager.AddToRoleAsync(admin, "Admin");
+        }
+    }
+
+    private static async Task SeedDataAsync(ApplicationDbContext context)
+    {
+        if (await context.Categories.AnyAsync() ||
+            await context.Suppliers.AnyAsync() ||
+            await context.Products.AnyAsync() ||
+            await context.StockMovements.AnyAsync())
         {
             return;
         }
@@ -44,7 +98,7 @@ public static class DbSeeder
                 Reference = "PROD-001",
                 Quantity = 15,
                 UnitPrice = 899.99m,
-                AlertThreshold = 5,
+                AlertQuantity = 5,
                 CategoryId = categories[0].Id,
                 SupplierId = suppliers[0].Id
             },
@@ -54,7 +108,7 @@ public static class DbSeeder
                 Reference = "PROD-002",
                 Quantity = 4,
                 UnitPrice = 19.99m,
-                AlertThreshold = 10,
+                AlertQuantity = 10,
                 CategoryId = categories[3].Id,
                 SupplierId = suppliers[2].Id
             },
@@ -64,7 +118,7 @@ public static class DbSeeder
                 Reference = "PROD-003",
                 Quantity = 25,
                 UnitPrice = 14.99m,
-                AlertThreshold = 8,
+                AlertQuantity = 8,
                 CategoryId = categories[3].Id,
                 SupplierId = suppliers[2].Id
             },
@@ -74,7 +128,7 @@ public static class DbSeeder
                 Reference = "PROD-004",
                 Quantity = 8,
                 UnitPrice = 159.99m,
-                AlertThreshold = 5,
+                AlertQuantity = 5,
                 CategoryId = categories[0].Id,
                 SupplierId = suppliers[1].Id
             },
@@ -84,7 +138,7 @@ public static class DbSeeder
                 Reference = "PROD-005",
                 Quantity = 2,
                 UnitPrice = 349.99m,
-                AlertThreshold = 3,
+                AlertQuantity = 3,
                 CategoryId = categories[2].Id,
                 SupplierId = suppliers[3].Id
             },
@@ -94,7 +148,7 @@ public static class DbSeeder
                 Reference = "PROD-006",
                 Quantity = 12,
                 UnitPrice = 89.99m,
-                AlertThreshold = 5,
+                AlertQuantity = 5,
                 CategoryId = categories[4].Id,
                 SupplierId = suppliers[0].Id
             }
