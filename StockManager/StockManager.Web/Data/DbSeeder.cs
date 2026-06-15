@@ -25,6 +25,12 @@ public static class DbSeeder
             "Employee123!",
             "Employee");
 
+        await CreateUserAsync(
+            userManager,
+            "visitor@amadagoit.com",
+            "Visitor123!",
+            "Visitor");
+
         await SeedDataAsync(context);
     }
 
@@ -40,7 +46,7 @@ public static class DbSeeder
         {
             user = new IdentityUser
             {
-                UserName = email,
+                UserName = email.Split('@')[0],
                 Email = email,
                 EmailConfirmed = true
             };
@@ -59,7 +65,7 @@ public static class DbSeeder
     }
     private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
     {
-        string[] roles = { "Admin", "Manager", "Employee" };
+        string[] roles = { "Admin", "Manager", "Employee","Visitor" };
 
         foreach (var role in roles)
         {
@@ -81,7 +87,7 @@ public static class DbSeeder
         {
             admin = new IdentityUser
             {
-                UserName = adminEmail,
+                UserName = adminEmail.Split('@')[0],
                 Email = adminEmail,
                 EmailConfirmed = true
             };

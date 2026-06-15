@@ -8,14 +8,78 @@ namespace StockManager.Web.Controllers;
 public class AdminController : Controller
 {
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
 
-    public AdminController(UserManager<IdentityUser> userManager)
+    public AdminController(
+        UserManager<IdentityUser> userManager,
+        RoleManager<IdentityRole> roleManager)
     {
         _userManager = userManager;
+        _roleManager = roleManager;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View(_userManager.Users.ToList());
+        var users = _userManager.Users.ToList();
+        var model = new List<UserRoleViewModel>();
+
+        foreach (var user in users)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+
+            model.Add(new UserRoleViewModel
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                Role = roles.FirstOrDefault() ?? "Aucun rôle"
+            });
+        }
+
+        return View(model);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> ChangeRole(string userId, string role)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+        if (!string.IsNullOrWhiteSpace(role))
+        {
+            await _userManager.AddToRoleAsync(user, role);
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteUser(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        await _userManager.DeleteAsync(user);
+
+        return RedirectToAction(nameof(Index));
+    }
+}
+
+public class UserRoleViewModel
+{
+    public string UserId { get; set; } = string.Empty;
+    public string? UserName { get; set; }
+    public string? Email { get; set; }
+    public string Role { get; set; } = string.Empty;
 }

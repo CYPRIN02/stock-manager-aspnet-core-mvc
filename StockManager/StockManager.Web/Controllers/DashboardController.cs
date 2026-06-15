@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StockManager.Web.Services.Interfaces;
 
 namespace StockManager.Web.Controllers;
+
+[Authorize(Roles = "Admin,Manager")]
 
 public class DashboardController : Controller
 {

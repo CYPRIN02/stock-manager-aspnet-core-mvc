@@ -1,0 +1,68 @@
+﻿@model List<StockManager.Web.Controllers.UserRoleViewModel>
+
+@{
+    ViewData["Title"] = "Administration des utilisateurs";
+}
+
+<div class="container py-4">
+    <h1 class="fw-bold mb-3">Administration des utilisateurs</h1>
+    <p class="text-muted">
+        Gérez les comptes utilisateurs et leurs rôles dans Stock Manager.
+    </p>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Email</th>
+                        <th>Rôle actuel</th>
+                        <th>Changer rôle</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@user.UserName</td>
+                            <td>@user.Email</td>
+                            <td>
+                                <span class="badge bg-primary">@user.Role</span>
+                            </td>
+                            <td>
+                                <form asp-action="ChangeRole" method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="userId" value="@user.UserId" />
+
+                                    <select name="role" class="form-select form-select-sm">
+                                        <option value="Admin" selected="@(user.Role == "Admin")">Admin</option>
+                                        <option value="Manager" selected="@(user.Role == "Manager")">Manager</option>
+                                        <option value="Employee" selected="@(user.Role == "Employee")">Employee</option>
+                                        <option value="Visitor" selected="@(user.Role == "Visitor")">Visitor</option>
+                                    </select>
+
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                                        Modifier
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="text-end">
+                                <form asp-action="DeleteUser"
+                                      method="post"
+                                      onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                                    <input type="hidden" name="userId" value="@user.UserId" />
+
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
