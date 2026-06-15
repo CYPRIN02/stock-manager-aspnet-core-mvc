@@ -3,25 +3,94 @@
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
-<ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
-    </li>
-    <li class="nav-item">
-        <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>
-        </form>
-    </li>
-}
-else
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
-}
+<ul class="navbar-nav ms-auto align-items-center">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle fw-semibold text-dark"
+               href="#"
+               role="button"
+               data-bs-toggle="dropdown"
+               aria-expanded="false">
+                👤 @UserManager.GetUserName(User)
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                <li>
+                    <span class="dropdown-item-text small text-muted">
+                        Connecté en tant que
+                    </span>
+                </li>
+
+                <li>
+                    <span class="dropdown-item fw-semibold">
+                        @UserManager.GetUserName(User)
+                    </span>
+                </li>
+
+                <li><hr class="dropdown-divider" /></li>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <li>
+                        <span class="dropdown-item">
+                            <span class="badge bg-danger">Admin</span>
+                        </span>
+                    </li>
+                }
+                else if (User.IsInRole("Manager"))
+                {
+                    <li>
+                        <span class="dropdown-item">
+                            <span class="badge bg-warning text-dark">Manager</span>
+                        </span>
+                    </li>
+                }
+                else if (User.IsInRole("Employee"))
+                {
+                    <li>
+                        <span class="dropdown-item">
+                            <span class="badge bg-info text-dark">Employee</span>
+                        </span>
+                    </li>
+                }
+
+                <li><hr class="dropdown-divider" /></li>
+
+                <li>
+                    <form id="logoutForm"
+                          asp-area="Identity"
+                          asp-page="/Account/Logout"
+                          asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
+                          method="post">
+                        <button id="logout"
+                                type="submit"
+                                class="dropdown-item text-danger fw-semibold">
+                            Se déconnecter
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark fw-semibold"
+               id="register"
+               asp-area="Identity"
+               asp-page="/Account/Register">
+                Inscription
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link text-dark fw-semibold"
+               id="login"
+               asp-area="Identity"
+               asp-page="/Account/Login">
+                Connexion
+            </a>
+        </li>
+    }
 </ul>

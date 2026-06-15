@@ -6,6 +6,9 @@ using StockManager.Web.Repositories.Interfaces;
 using StockManager.Web.Services;
 using StockManager.Web.Services.Interfaces;
 
+using Microsoft.AspNetCore.Identity.UI.Services;
+using NoOpEmailSender = StockManager.Web.Services.NoOpEmailSender;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
@@ -47,6 +50,8 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IStockMovementRepository, StockMovementRepository>();
 
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+
+builder.Services.AddTransient<IEmailSender, NoOpEmailSender>();
 
 var app = builder.Build();
 
