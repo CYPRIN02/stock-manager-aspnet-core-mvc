@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -58,6 +59,48 @@
             </ul>
 
         </nav>
+
+        @if (User.Identity?.IsAuthenticated ?? false)
+        {
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"
+                   data-bs-toggle="dropdown"
+                   href="#">
+                    👤 @User.Identity.Name
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <span class="dropdown-item-text">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <span class="badge bg-danger">Admin</span>
+                            }
+                            else if (User.IsInRole("Manager"))
+                            {
+                                <span class="badge bg-warning">Manager</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">Employee</span>
+                            }
+                        </span>
+                    </li>
+
+                    <li><hr class="dropdown-divider"></li>
+
+                    <li>
+                        <form asp-area="Identity"
+                              asp-page="/Account/Logout"
+                              method="post">
+                            <button class="dropdown-item">
+                                Déconnexion
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </li>
+        }
     </header>
     <div class="container">
         <main role="main" class="pb-3">

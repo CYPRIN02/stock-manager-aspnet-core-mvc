@@ -13,9 +13,50 @@ public static class DbSeeder
 
         await SeedRolesAsync(roleManager);
         await SeedAdminAsync(userManager);
+        await CreateUserAsync(
+        userManager,
+        "manager@amadagoit.com",
+        "Manager123!",
+        "Manager");
+
+        await CreateUserAsync(
+            userManager,
+            "employee@amadagoit.com",
+            "Employee123!",
+            "Employee");
+
         await SeedDataAsync(context);
     }
 
+    private static async Task CreateUserAsync(
+    UserManager<IdentityUser> userManager,
+    string email,
+    string password,
+    string role)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            user = new IdentityUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(user, password);
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, role);
+            }
+        }
+        else if (!await userManager.IsInRoleAsync(user, role))
+        {
+            await userManager.AddToRoleAsync(user, role);
+        }
+    }
     private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
     {
         string[] roles = { "Admin", "Manager", "Employee" };
