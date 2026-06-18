@@ -1,0 +1,5 @@
+/* Visual Studio Settings File */
+{
+  "test.coverage.config.overrideRunsettings": false,
+  "test.coverage.config.format": "xml"
+}
