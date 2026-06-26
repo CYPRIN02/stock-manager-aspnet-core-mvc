@@ -120,7 +120,7 @@ namespace StockManager.Web.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    _logger.LogInformation("Nouveau compte créé | UserId={UserId} | Email={Email}", await _userManager.GetUserIdAsync(user), Input.Email);
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -144,12 +144,19 @@ namespace StockManager.Web.Areas.Identity.Pages.Account
                         return LocalRedirect(returnUrl);
                     }
                 }
+                _logger.LogWarning(
+                    "Création de compte échouée | Email={Email} | Erreurs={Errors}",
+                    Input.Email,
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
 
+            _logger.LogWarning("Création de compte invalide ou refusée | Email={Email}", Input?.Email);
+            
             // If we got this far, something failed, redisplay form
             return Page();
         }

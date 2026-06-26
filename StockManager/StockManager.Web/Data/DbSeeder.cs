@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StockManager.Web.Models;
+
 namespace StockManager.Web.Data;
 
 public static class DbSeeder
@@ -10,35 +11,45 @@ public static class DbSeeder
         var context = services.GetRequiredService<ApplicationDbContext>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+        var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("StockManager.Web.Data.DbSeeder");
 
-        await SeedRolesAsync(roleManager);
-        await SeedAdminAsync(userManager);
+        logger.LogInformation("Démarrage du seeding de la base de données.");
+
+        await SeedRolesAsync(roleManager, logger);
+        await SeedAdminAsync(userManager, logger);
+
         await CreateUserAsync(
         userManager,
-        "manager@amadagoit.com",
-        "Manager123!",
-        "Manager");
+            "manager@amadagoit.com",
+            "Manager123!",
+            "Manager",
+            logger);
 
         await CreateUserAsync(
             userManager,
             "employee@amadagoit.com",
             "Employee123!",
-            "Employee");
+            "Employee",
+            logger);
 
         await CreateUserAsync(
             userManager,
             "visitor@amadagoit.com",
             "Visitor123!",
-            "Visitor");
+            "Visitor",
+            logger);
 
-        await SeedDataAsync(context);
+        await SeedDataAsync(context, logger);
+
+        logger.LogInformation("Seeding de la base de données terminé.");
     }
 
     private static async Task CreateUserAsync(
-    UserManager<IdentityUser> userManager,
-    string email,
-    string password,
-    string role)
+        UserManager<IdentityUser> userManager,
+        string email,
+        string password,
+        string role,
+        ILogger logger)
     {
         var user = await userManager.FindByEmailAsync(email);
 
@@ -55,15 +66,50 @@ public static class DbSeeder
 
             if (result.Succeeded)
             {
-                await userManager.AddToRoleAsync(user, role);
+                logger.LogInformation("Compte seed créé | Email={Email} | Role={Role}", email, role);
+                await AddUserToRoleAsync(userManager, user, role, logger);
+            }
+            else
+            {
+                logger.LogError(
+                    "Création compte seed échouée | Email={Email} | Erreurs={Errors}",
+                    email,
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
             }
         }
         else if (!await userManager.IsInRoleAsync(user, role))
         {
-            await userManager.AddToRoleAsync(user, role);
+            await AddUserToRoleAsync(userManager, user, role, logger);
+        }
+        else
+        {
+            logger.LogDebug("Compte seed déjà présent avec le bon rôle | Email={Email} | Role={Role}", email, role);
         }
     }
-    private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
+
+    private static async Task AddUserToRoleAsync(
+        UserManager<IdentityUser> userManager,
+        IdentityUser user,
+        string role,
+        ILogger logger)
+    {
+        var result = await userManager.AddToRoleAsync(user, role);
+
+        if (result.Succeeded)
+        {
+            logger.LogInformation("Rôle seed affecté | Email={Email} | Role={Role}", user.Email, role);
+        }
+        else
+        {
+            logger.LogError(
+                "Affectation rôle seed échouée | Email={Email} | Role={Role} | Erreurs={Errors}",
+                user.Email,
+                role,
+                string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+    }
+
+    private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager, ILogger logger)
     {
         string[] roles = { "Admin", "Manager", "Employee","Visitor" };
 
@@ -71,12 +117,28 @@ public static class DbSeeder
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
-                await roleManager.CreateAsync(new IdentityRole(role));
+                var result = await roleManager.CreateAsync(new IdentityRole(role));
+
+                if (result.Succeeded)
+                {
+                    logger.LogInformation("Rôle seed créé | Role={Role}", role);
+                }
+                else
+                {
+                    logger.LogError(
+                        "Création rôle seed échouée | Role={Role} | Erreurs={Errors}",
+                        role,
+                        string.Join(", ", result.Errors.Select(e => e.Description)));
+                }
+            }
+            else
+            {
+                logger.LogDebug("Rôle seed déjà présent | Role={Role}", role);
             }
         }
     }
 
-    private static async Task SeedAdminAsync(UserManager<IdentityUser> userManager)
+    private static async Task SeedAdminAsync(UserManager<IdentityUser> userManager, ILogger logger)
     {
         const string adminEmail = "admin@amadagoit.com";
         const string adminPassword = "Admin123!";
@@ -96,22 +158,35 @@ public static class DbSeeder
 
             if (result.Succeeded)
             {
-                await userManager.AddToRoleAsync(admin, "Admin");
+                logger.LogInformation("Compte administrateur seed créé | Email={Email}", adminEmail);
+                await AddUserToRoleAsync(userManager, admin, "Admin", logger);
+            }
+            else
+            {
+                logger.LogError(
+                    "Création administrateur seed échouée | Email={Email} | Erreurs={Errors}",
+                    adminEmail,
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
             }
         }
         else if (!await userManager.IsInRoleAsync(admin, "Admin"))
         {
-            await userManager.AddToRoleAsync(admin, "Admin");
+            await AddUserToRoleAsync(userManager, admin, "Admin", logger);
+        }
+        else
+        {
+            logger.LogDebug("Compte administrateur seed déjà présent avec le rôle Admin.");
         }
     }
 
-    private static async Task SeedDataAsync(ApplicationDbContext context)
+    private static async Task SeedDataAsync(ApplicationDbContext context, ILogger logger)
     {
         if (await context.Categories.AnyAsync() ||
             await context.Suppliers.AnyAsync() ||
             await context.Products.AnyAsync() ||
             await context.StockMovements.AnyAsync())
         {
+            logger.LogInformation("Données métier déjà présentes : seeding métier ignoré.");
             return;
         }
 
@@ -137,6 +212,8 @@ public static class DbSeeder
         await context.Suppliers.AddRangeAsync(suppliers);
         await context.SaveChangesAsync();
 
+        logger.LogInformation("Données seed catégories/fournisseurs ajoutées | Categories={CategoryCount} | Fournisseurs={SupplierCount}", categories.Count, suppliers.Count);
+        
         var products = new List<Product>
         {
             new()
@@ -204,6 +281,8 @@ public static class DbSeeder
         await context.Products.AddRangeAsync(products);
         await context.SaveChangesAsync();
 
+        logger.LogInformation("Données seed produits ajoutées | Produits={ProductCount}", products.Count);
+        
         var movements = new List<StockMovement>
         {
             new()
@@ -242,5 +321,7 @@ public static class DbSeeder
 
         await context.StockMovements.AddRangeAsync(movements);
         await context.SaveChangesAsync();
+
+        logger.LogInformation("Données seed mouvements de stock ajoutées | Mouvements={MovementCount}", movements.Count);
     }
 }

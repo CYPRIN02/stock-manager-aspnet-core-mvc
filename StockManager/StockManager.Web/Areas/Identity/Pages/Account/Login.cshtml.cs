@@ -101,81 +101,106 @@ namespace StockManager.Web.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             ReturnUrl = returnUrl;
+
+            _logger.LogDebug(
+                "Page login chargée | ReturnUrl={ReturnUrl} | TraceId={TraceId}",
+                returnUrl,
+                HttpContext.TraceIdentifier);
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                //var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                var user = await _userManager.FindByEmailAsync(Input.Email);
+                _logger.LogWarning(
+                    "Tentative de connexion invalide : modèle non valide | Email={Email} | TraceId={TraceId}",
+                    Input?.Email,
+                    HttpContext.TraceIdentifier);
 
-                if (user == null)
-                {
-                    ModelState.AddModelError(string.Empty, "Identifiant ou mot de passe incorrect.");
-                    return Page();
-                }
-
-                var result = await _signInManager.PasswordSignInAsync(
-                    user.UserName,
-                    Input.Password,
-                    Input.RememberMe,
-                    lockoutOnFailure: false);
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User logged in.");
-
-                    //var user = await _userManager.FindByEmailAsync(Input.Email);
-
-                    if (user != null)
-                    {
-                        if (await _userManager.IsInRoleAsync(user, "Admin"))
-                        {
-                            return RedirectToAction("Index", "Dashboard");
-                        }
-
-                        if (await _userManager.IsInRoleAsync(user, "Manager"))
-                        {
-                            return RedirectToAction("Index", "Dashboard");
-                        }
-
-                        if (await _userManager.IsInRoleAsync(user, "Employee"))
-                        {
-                            return RedirectToAction("Index", "Products");
-                        }
-
-                        if (await _userManager.IsInRoleAsync(user, "Visitor"))
-                        {
-                            return RedirectToAction("Index", "Home");
-                        }
-                    }
-
-                    return LocalRedirect(returnUrl);
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
-                }
+                return Page();
             }
 
-            // If we got this far, something failed, redisplay form
+            var user = await _userManager.FindByEmailAsync(Input.Email);
+
+            if (user == null)
+            {
+                _logger.LogWarning(
+                    "Tentative de connexion refusée : email introuvable | Email={Email} | TraceId={TraceId}",
+                    Input.Email,
+                    HttpContext.TraceIdentifier);
+
+                ModelState.AddModelError(string.Empty, "Identifiant ou mot de passe incorrect.");
+                return Page();
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(
+                user.UserName,
+                Input.Password,
+                Input.RememberMe,
+                lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation(
+                    "Utilisateur connecté | UserId={UserId} | Email={Email} | RememberMe={RememberMe} | TraceId={TraceId}",
+                    user.Id,
+                    user.Email,
+                    Input.RememberMe,
+                    HttpContext.TraceIdentifier);
+
+                if (await _userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    _logger.LogDebug("Redirection post-login vers Dashboard | Role=Admin | Email={Email}", user.Email);
+                    return RedirectToAction("Index", "Dashboard");
+                }
+
+                if (await _userManager.IsInRoleAsync(user, "Manager"))
+                {
+                    _logger.LogDebug("Redirection post-login vers Dashboard | Role=Manager | Email={Email}", user.Email);
+                    return RedirectToAction("Index", "Dashboard");
+                }
+
+                if (await _userManager.IsInRoleAsync(user, "Employee"))
+                {
+                    _logger.LogDebug("Redirection post-login vers Products | Role=Employee | Email={Email}", user.Email);
+                    return RedirectToAction("Index", "Products");
+                }
+
+                if (await _userManager.IsInRoleAsync(user, "Visitor"))
+                {
+                    _logger.LogDebug("Redirection post-login vers Home | Role=Visitor | Email={Email}", user.Email);
+                    return RedirectToAction("Index", "Home");
+                }
+
+                _logger.LogInformation(
+                    "Utilisateur connecté sans rôle applicatif connu | Email={Email} | ReturnUrl={ReturnUrl}",
+                    user.Email,
+                    returnUrl);
+
+                return LocalRedirect(returnUrl);
+            }
+
+            if (result.RequiresTwoFactor)
+            {
+                _logger.LogInformation("Connexion nécessite 2FA | Email={Email}", Input.Email);
+                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+            }
+
+            if (result.IsLockedOut)
+            {
+                _logger.LogWarning("Compte verrouillé pendant la connexion | Email={Email}", Input.Email);
+                return RedirectToPage("./Lockout");
+            }
+
+            _logger.LogWarning(
+                "Tentative de connexion échouée : mot de passe ou identifiant incorrect | Email={Email} | TraceId={TraceId}",
+                Input.Email,
+                HttpContext.TraceIdentifier);
+
+            ModelState.AddModelError(string.Empty, "Identifiant ou mot de passe incorrect.");
             return Page();
         }
     }
